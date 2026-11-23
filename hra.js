@@ -796,6 +796,7 @@ function ukazDetail(d) {
 }
 
 $('#menuBtn').addEventListener('click', () => ukaz('#menu'));
+$('#qrKraj').addEventListener('click', () => ukaz('#prispevek'));
 $('#profil').addEventListener('click', () => { otevriAlbum(); ukaz('#album'); });
 $('#okoli').addEventListener('click', () => {
   const t = [...znacky.values()].filter(z => z.typ === 'tvor').map(z => z.data).sort((a, b) => a.d - b.d)[0];
