@@ -348,7 +348,6 @@ function ovladaniMapy() {
     if (!prsty.has(e.pointerId)) return;
     prsty.delete(e.pointerId);
     if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && poloha) {
-      if (!stav.test) { stav.testPoz = poloha.slice(); prepniTest(true, true); toast('Chodíš ťukáním na mapu. Chůzi podle GPS zapneš v Nastavení.', 3500); }
       const r = c.getBoundingClientRect();
       const ll = mapa.unproject([e.clientX - r.left, e.clientY - r.top]);
       cilChuze = [ll.lng, ll.lat];
@@ -364,7 +363,7 @@ let posledniPulz = 0, posledniSnimek = performance.now(), posledniDosah = null, 
 function smycka(t) {
   const dtSkut = Math.min(1, (t - posledniSnimek) / 1000);
   const dt = Math.min(0.1, dtSkut); posledniSnimek = t;
-  if (stav.test && cilChuze && poloha) {
+  if (cilChuze && poloha) {
     const d = vzdal(poloha, cilChuze), krok = NAST.rychlostTest * dtSkut;
     if (d <= krok) { poloha = cilChuze; cilChuze = null; } else poloha = posun(poloha, krok, smer(poloha, cilChuze));
     stav.testPoz = poloha;
@@ -487,7 +486,6 @@ function obnovOkoli(tvory) {
 
 // Dojdi k cíli, zastav se kousek před ním (už na dosah)
 function jdiK(cil, d, dosah) {
-  if (!stav.test) { stav.testPoz = poloha.slice(); prepniTest(true, true); }
   const zastav = Math.max(0, d - dosah * 0.6);
   cilChuze = posun(poloha, zastav, smer(poloha, cil));
 }
@@ -835,6 +833,7 @@ $('#btnReset').addEventListener('click', () => {
 //  GPS / zkušební procházka
 // =============================================================
 let napovedaChuze = false;
+let posledniGps = null, posledniGpsPresnost = null;
 let gpsWatch = null, gpsPrvni = true;
 function nastavGpsStav(t) { const e = $('#gpsStav'); if (!t) e.classList.add('skryto'); else { e.textContent = t; e.classList.remove('skryto'); } }
 
@@ -846,10 +845,18 @@ function spustGPS() {
   gpsWatch = navigator.geolocation.watchPosition(p => {
     if (stav.test) return;
     presnost = p.coords.accuracy;
+    const gps = [p.coords.longitude, p.coords.latitude];
     const prvni = !poloha || gpsPrvni;
+    // Přesná poloha: ber nejlepší měření, dokud se GPS nezpřesní
+    if (prvni || (presnost < (posledniGpsPresnost || 1e9) && !cilChuze && vzdal(gps, posledniGps || gps) < 60)) {
+      if (prvni) { poloha = gps; zobrazena = null; cilChuze = null; toast(presnost <= 30 ? 'Jsi tady – ťukej na mapu a choď' : 'Hledám přesnější polohu…', 2500); }
+      else if (vzdal(gps, poloha) < 60) poloha = gps;
+      posledniGps = gps; posledniGpsPresnost = presnost;
+    } else if (vzdal(gps, posledniGps) > Math.max(20, presnost)) {
+      // opravdu ses pohnul → panáček skočí na tvoje skutečné místo
+      poloha = gps; posledniGps = gps; posledniGpsPresnost = presnost; cilChuze = null;
+    }
     gpsPrvni = false;
-    poloha = [p.coords.longitude, p.coords.latitude];
-    if (prvni) zobrazena = null;
     if (!mapa) vytvorMapu(poloha);
     nastavGpsStav(presnost > 60 ? `Slabé GPS (±${Math.round(presnost)} m)` : '');
   }, err => {
@@ -857,7 +864,7 @@ function spustGPS() {
     if (err.code === 1) nastavGpsStav('Poloha zakázaná – povol ji v Nastavení, nebo zapni Zkušební procházku');
     else nastavGpsStav('GPS nejde – jdi ven, nebo zapni Zkušební procházku');
     // GPS nikdy nenašlo polohu → přepnout na zkušební procházku, ať jde chodit ťukáním
-    if (!poloha || !mapa) { prepniTest(true); toast(err.code === 1 ? 'Poloha je zakázaná – chodíš ťukáním na mapu (zkušební procházka)' : 'Nevidím GPS – chodíš ťukáním na mapu (zkušební procházka)', 4500); }
+    if (!poloha || !mapa) { poloha = (stav.testPoz || [MESTA.litomysl.lon, MESTA.litomysl.lat]).slice(); zobrazena = null; if (!mapa) vytvorMapu(poloha); toast(err.code === 1 ? 'Poloha je zakázaná – povol ji v Nastavení telefonu. Zatím chodíš ťukáním.' : 'Nevidím GPS – zatím chodíš ťukáním na mapu.', 5000); }
   }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
 }
 function zastavGPS() { if (gpsWatch !== null) { navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; } }
