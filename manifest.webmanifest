@@ -1,0 +1,17 @@
+{
+  "name": "Lovci samolepek",
+  "short_name": "Samolepky",
+  "description": "Choď po městě a chytej samolepky do alba.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1c1b3a",
+  "theme_color": "#1c1b3a",
+  "lang": "cs",
+  "icons": [
+    { "src": "ikony/ikona-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "ikony/ikona-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "ikony/ikona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

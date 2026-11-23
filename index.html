@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Lovci samolepek</title>
+<meta name="theme-color" content="#1c1b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Samolepky">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="ikony/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="ikony/ikona-192.png">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="styl.css">
+</head>
+<body>
+
+<div id="mapa"></div>
+<div id="nebe"></div>
+<div id="nacitani" class="skryto"><div class="lapka velka"></div><b>Načítám mapu…</b></div>
+
+<!-- Horní lišta -->
+<div id="horni">
+  <button id="profil" aria-label="Profil">
+    <div class="profil-ava"><svg viewBox="0 0 40 40"><circle cx="20" cy="22" r="13" fill="#ffd9bd"/><path d="M6.5 20 a13.5 12 0 0 1 27 0z" fill="#1fc8b0"/><rect x="21" y="16" width="14" height="4.4" rx="2.2" fill="#0e8c79"/><circle cx="16" cy="24" r="1.6" fill="#1d1b3a"/><circle cx="24.5" cy="24" r="1.6" fill="#1d1b3a"/><path d="M16.5 29 q3.5 2.6 7 0" stroke="#1d1b3a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg><div id="lvl">1</div></div>
+    <div class="profil-txt">
+      <div id="jmenoHrace">Lovec</div>
+      <div class="xpbar"><i id="xpFill"></i></div>
+      <div id="xpText">0 / 400 XP</div>
+    </div>
+  </button>
+  <div id="gpsStav" class="skryto"></div>
+</div>
+<button id="kompas" aria-label="Severem nahoru"><span>N</span></button>
+
+<!-- V okolí -->
+<button id="okoli" aria-label="Samolepky v okolí">
+  <div class="okoli-tit">V okolí</div>
+  <div id="okoliSeznam"></div>
+</button>
+
+<!-- Hlavní tlačítko -->
+<button id="menuBtn" aria-label="Menu"><span class="lapka"></span></button>
+<div id="lapkyPocet" class="pocitadlo">30</div>
+
+<div id="toast"></div>
+
+<!-- Menu -->
+<div id="menu" class="vrstva skryto">
+  <div class="menu-mrizka">
+    <button data-otevri="album"><span class="ik">📒</span>Album</button>
+    <button data-otevri="batoh"><span class="ik">🎒</span>Batoh</button>
+    <button data-otevri="nastaveni"><span class="ik">⚙️</span>Nastavení</button>
+  </div>
+  <button class="zavrit-kulate" data-zavri>✕</button>
+</div>
+
+<!-- Album -->
+<section id="album" class="obrazovka skryto">
+  <header><button class="zpet" data-zavri>‹</button><h2>Album samolepek</h2><span id="albumPocet"></span></header>
+  <div id="albumMrizka" class="album-mrizka"></div>
+</section>
+
+<!-- Detail samolepky -->
+<div id="detail" class="vrstva skryto">
+  <div class="karta">
+    <div id="detailObr" class="samolepka velka"></div>
+    <h3 id="detailJmeno"></h3>
+    <div id="detailVz" class="stitek"></div>
+    <p id="detailPopis"></p>
+    <div id="detailHodnoty" class="hodnoty-mrizka"></div>
+    <p id="detailInfo" class="sede"></p>
+    <button class="tlac" data-zavri>Zavřít</button>
+  </div>
+</div>
+
+<!-- Batoh -->
+<section id="batoh" class="obrazovka skryto">
+  <header><button class="zpet" data-zavri>‹</button><h2>Batoh</h2><span></span></header>
+  <div class="seznam">
+    <div class="polozka"><span class="lapka mala"></span><div><b>Lapka</b><div class="sede">Hází se po samolepkách.</div></div><b id="batohLapky">0</b></div>
+    <div class="polozka"><span class="ik-velka">🍯</span><div><b>Lepidlo</b><div class="sede">Další hod chytí líp (×1,6).</div></div><b id="batohLepidlo">0</b></div>
+  </div>
+  <p class="sede stred">Lapky a lepidlo dostaneš na Lepárnách (modré sloupky na mapě).</p>
+</section>
+
+<!-- Nastavení -->
+<section id="nastaveni" class="obrazovka skryto">
+  <header><button class="zpet" data-zavri>‹</button><h2>Nastavení</h2><span></span></header>
+  <div class="seznam">
+    <label class="polozka"><div><b>Jméno lovce</b></div><input id="inJmeno" maxlength="16"></label>
+    <label class="polozka"><div><b>Zkušební procházka</b><div class="sede">Bez GPS – ťukni na mapu a panáček tam dojde. Na zkoušení doma.</div></div><input type="checkbox" id="inTest" class="prepinac"></label>
+    <div id="testMesta" class="polozka skryto"><div><b>Skočit do města</b></div>
+      <div class="radek"><button class="tlac male" data-mesto="litomysl">Litomyšl</button><button class="tlac male" data-mesto="usti">Ústí</button></div></div>
+    <label class="polozka"><div><b>Zvuky</b></div><input type="checkbox" id="inZvuk" class="prepinac"></label>
+    <div class="polozka"><div><b>Smazat postup</b><div class="sede">Album, lapky i úroveň od začátku.</div></div><button id="btnReset" class="tlac male cervene">Smazat</button></div>
+  </div>
+  <p class="sede stred" id="verze"></p>
+</section>
+
+<!-- Lepárna (zastávka) -->
+<div id="lepar" class="vrstva skryto">
+  <div class="karta">
+    <h3 id="zastJmeno">Lepárna</h3>
+    <div id="zastDisk" class="disk"><span>★</span></div>
+    <p id="zastText" class="sede">Roztoč disk prstem.</p>
+    <button class="tlac" data-zavri>Zavřít</button>
+  </div>
+</div>
+
+<!-- Chytání -->
+<section id="lov" class="skryto">
+  <svg class="lov-krajina" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="kNebe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb8ff"/><stop offset=".55" stop-color="#bfe6ff"/><stop offset="1" stop-color="#eaf7ff"/></linearGradient>
+      <linearGradient id="kTrava" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9be36f"/><stop offset="1" stop-color="#3f9e3c"/></linearGradient>
+      <radialGradient id="kSlunce" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fffbe0"/><stop offset=".35" stop-color="#fff3b0" stop-opacity=".9"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></radialGradient>
+      <radialGradient id="kPlosina" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#c9f59e"/><stop offset="1" stop-color="#7fcf5c"/></radialGradient>
+    </defs>
+    <rect width="400" height="800" fill="url(#kNebe)"/>
+    <circle cx="320" cy="90" r="90" fill="url(#kSlunce)"/>
+    <g class="mraky" fill="#fff" opacity=".95">
+      <g class="mrak m1"><ellipse cx="70" cy="140" rx="46" ry="16"/><ellipse cx="90" cy="128" rx="26" ry="18"/><ellipse cx="58" cy="132" rx="18" ry="13"/></g>
+      <g class="mrak m2"><ellipse cx="260" cy="220" rx="38" ry="13"/><ellipse cx="276" cy="210" rx="20" ry="14"/></g>
+      <g class="mrak m3" opacity=".8"><ellipse cx="150" cy="70" rx="30" ry="10"/><ellipse cx="162" cy="63" rx="16" ry="10"/></g>
+    </g>
+    <path d="M0 455 Q60 395 130 430 T260 420 T400 430 V800 H0Z" fill="#8fcf7a" opacity=".55"/>
+    <path d="M0 470 Q90 425 180 455 T400 445 V800 H0Z" fill="#7cc566" opacity=".75"/>
+    <g fill="#4f9e4a" opacity=".7"><circle cx="40" cy="452" r="14"/><circle cx="56" cy="446" r="11"/><circle cx="352" cy="440" r="15"/><circle cx="335" cy="447" r="10"/><circle cx="210" cy="452" r="9"/></g>
+    <rect y="480" width="400" height="320" fill="url(#kTrava)"/>
+    <ellipse cx="200" cy="420" rx="120" ry="30" fill="url(#kPlosina)" opacity=".0"/>
+    <g fill="#5cbf4c" opacity=".8">
+      <path d="M30 640 q4-26 -6-38 q16 12 14 38z"/><path d="M40 640 q2-20 10-30 q-5 15 -4 30z"/>
+      <path d="M350 700 q4-26 -6-38 q16 12 14 38z"/><path d="M362 700 q2-20 10-30 q-5 15 -4 30z"/>
+      <path d="M90 760 q4-22 -5-32 q14 10 12 32z"/><path d="M300 560 q3-18 -4-26 q11 8 10 26z"/><path d="M120 545 q3-16 -4-23 q10 7 9 23z"/>
+    </g>
+    <g fill="#fff" opacity=".85"><circle cx="70" cy="600" r="3"/><circle cx="76" cy="596" r="3"/><circle cx="76" cy="604" r="3"/><circle cx="82" cy="600" r="3"/><circle cx="76" cy="600" r="2.4" fill="#ffd84d"/>
+    <circle cx="320" cy="760" r="3"/><circle cx="326" cy="756" r="3"/><circle cx="326" cy="764" r="3"/><circle cx="332" cy="760" r="3"/><circle cx="326" cy="760" r="2.4" fill="#ffd84d"/></g>
+  </svg>
+  <div class="lov-plosina"></div>
+  <div class="lov-horni">
+    <button id="lovUtec" class="kulate">🏃</button>
+    <div class="lov-info"><b id="lovJmeno"></b><span id="lovVz" class="stitek"></span></div>
+    <button id="lovLepidlo" class="kulate">🍯<small id="lovLepPocet">0</small></button>
+  </div>
+  <div id="lovSila"></div>
+  <div id="lovTvorObal"><div id="lovKruh"><i></i></div><div id="lovStin"></div><div id="lovTvor" class="samolepka"></div></div>
+  <div id="lovHlaska"></div>
+  <div id="lovMic" class="lapka velka"></div>
+  <div id="lovLapky" class="sede"></div>
+  <div id="lovVysledek" class="vrstva skryto">
+    <div class="karta">
+      <div id="vysObr" class="samolepka velka"></div>
+      <div id="vysStuha" class="stuha"></div>
+      <h3 id="vysNadpis">Chyceno!</h3>
+      <p id="vysText"></p>
+      <button class="tlac" id="vysOk">Pokračovat</button>
+    </div>
+  </div>
+</section>
+
+<!-- Úvod -->
+<section id="uvod">
+  <div class="uvod-obsah">
+    <div class="uvod-samolepky"><span>😎</span><span>👻</span><span>🦄</span></div>
+    <h1>Lovci<br>samolepek</h1>
+    <p>Choď po Litomyšli a Ústí nad Orlicí, hledej samolepky a sbírej je do alba.</p>
+    <button id="btnHrat" class="tlac velke">Hrát</button>
+    <button id="btnTest" class="odkaz">Zkusit bez GPS</button>
+    <p id="uvodInstal" class="sede male"></p>
+  </div>
+</section>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="samolepky.js"></script>
+<script src="hra.js"></script>
+</body>
+</html>

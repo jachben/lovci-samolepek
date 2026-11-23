@@ -1,0 +1,369 @@
+:root{
+  --tma:#1c1b3a; --fialova:#6c5ce7; --tyrkys:#1fc8b0; --zluta:#ffd84d;
+  --bila:#fff; --sede:#8a8aa3; --karta:#ffffff; --text:#1c1b3a;
+  --st: env(safe-area-inset-top, 0px); --sb: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--tma);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input{font:inherit}
+.skryto{display:none!important}
+.sede{color:var(--sede);font-size:14px}
+.stred{text-align:center;padding:0 24px}
+.male{font-size:12px}
+
+#mapa{position:fixed;inset:0;background:#bfe3b4}
+.maplibregl-ctrl-attrib{font-size:9px;opacity:.6}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:calc(var(--sb) + 2px)}
+
+/* ---------- Horní lišta ---------- */
+#horni{position:fixed;left:12px;right:12px;top:calc(var(--st) + 10px);display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5}
+#profil{pointer-events:auto;display:flex;align-items:center;gap:10px;background:rgba(28,27,58,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  padding:6px 14px 6px 6px;border-radius:30px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#lvl{width:38px;height:38px;border-radius:50%;background:var(--zluta);color:var(--tma);font-weight:800;display:grid;place-items:center;font-size:17px;border:3px solid #fff}
+#jmenoHrace{font-weight:700;font-size:15px;text-align:left}
+.xpbar{width:96px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:4px;overflow:hidden}
+.xpbar i{display:block;height:100%;width:0;background:var(--tyrkys);border-radius:3px;transition:width .5s}
+#gpsStav{pointer-events:auto;background:#ff9f0a;color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:14px;max-width:46%}
+#kompas{position:fixed;right:14px;top:calc(var(--st) + 64px);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.92);z-index:5;
+  box-shadow:0 3px 10px rgba(0,0,0,.25);display:grid;place-items:center;font-weight:800;color:#ff3b30}
+#kompas span{display:block;transition:transform .1s linear}
+
+/* ---------- V okolí ---------- */
+#okoli{position:fixed;right:12px;bottom:calc(var(--sb) + 24px);z-index:5;background:rgba(255,255,255,.94);border-radius:16px;padding:8px 10px;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);min-width:96px;max-width:46vw;text-align:left}
+.okoli-tit{font-size:11px;font-weight:800;color:var(--sede);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+#okoliSeznam{display:flex;flex-wrap:wrap;gap:4px;min-height:28px}
+#okoliSeznam span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#f1f0f8;position:relative;overflow:hidden}
+#okoliSeznam span img{width:100%;height:100%;object-fit:contain}
+#okoliSeznam span.blizko{background:#d6fff3;box-shadow:0 0 0 2px var(--tyrkys)}
+#okoliSeznam .nic{font-size:12px;color:var(--sede);padding:6px 0}
+
+/* ---------- Lapka (míček) ---------- */
+.lapka{display:inline-block;width:56px;height:56px;border-radius:50%;position:relative;border:3px solid #fff;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.9) 0 7%,transparent 8%),
+             radial-gradient(circle at 50% 50%,var(--zluta) 0 24%,#f5a623 25% 28%,transparent 29%),
+             linear-gradient(155deg,#4ff0d3,#139c8a 70%);
+  box-shadow:inset -5px -7px 0 rgba(0,0,0,.16),0 5px 12px rgba(0,0,0,.35)}
+.lapka::after{content:"★";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:42%;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.lapka.mala{width:34px;height:34px;border-width:2px}
+.lapka.velka{width:84px;height:84px;border-width:4px}
+
+#menuBtn{position:fixed;left:50%;bottom:calc(var(--sb) + 20px);transform:translateX(-50%);z-index:6;padding:6px;border-radius:50%;
+  background:rgba(255,255,255,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#menuBtn .lapka{width:66px;height:66px;display:block}
+#menuBtn:active{transform:translateX(-50%) scale(.92)}
+.pocitadlo{position:fixed;left:calc(50% + 26px);bottom:calc(var(--sb) + 72px);z-index:7;background:var(--tma);color:#fff;font-weight:800;font-size:12px;
+  min-width:26px;height:22px;border-radius:11px;display:grid;place-items:center;padding:0 6px;border:2px solid #fff;pointer-events:none}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;top:calc(var(--st) + 70px);transform:translate(-50%,-20px);background:var(--tma);color:#fff;padding:10px 16px;border-radius:20px;
+  font-weight:600;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:86vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+#toast.vid{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Značky na mapě ---------- */
+.znacka{cursor:pointer}
+.tvor-mapa{position:relative;width:62px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.tvor-mapa .samolepka{width:54px;height:54px;font-size:32px;animation:houpani 2.2s ease-in-out infinite;border-width:4px}
+.tvor-mapa .stin{width:34px;height:9px;border-radius:50%;background:rgba(0,0,0,.28);margin-top:4px;animation:stin 2.2s ease-in-out infinite}
+.tvor-mapa.daleko .samolepka{filter:saturate(.85)}
+.tvor-mapa.blizko .samolepka{box-shadow:0 0 0 3px var(--tyrkys),0 6px 14px rgba(0,0,0,.35)}
+@keyframes houpani{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes stin{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.75);opacity:.7}}
+
+.samolepka{display:grid;place-items:center;border-radius:50%;background:#fff;border:5px solid var(--b,#fff);
+  box-shadow:0 6px 14px rgba(0,0,0,.35);position:relative;overflow:hidden;line-height:1}
+.samolepka img{width:88%;height:88%;object-fit:contain;pointer-events:none}
+.samolepka::after{content:"";position:absolute;right:-6%;bottom:-6%;width:30%;height:30%;background:linear-gradient(135deg,transparent 50%,#e8e8ef 50%);border-top-left-radius:40%}
+.samolepka.velka{width:150px;height:150px;font-size:88px;border-width:8px}
+
+.zast-mapa{position:relative;width:46px;height:86px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.zast-mapa .hlava{width:40px;height:40px;border-radius:12px;background:linear-gradient(160deg,#5ac8fa,#2a6fdb);border:3px solid #fff;display:grid;place-items:center;
+  color:#fff;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,.3);animation:tocka 4s linear infinite}
+.zast-mapa .noha{width:6px;height:30px;background:linear-gradient(#fff,#cfd3e6);border-radius:3px}
+.zast-mapa .pata{width:26px;height:8px;border-radius:50%;background:rgba(0,0,0,.25)}
+.zast-mapa.pouzita .hlava{background:linear-gradient(160deg,#c49cff,#7d4fd8);animation:none}
+.zast-mapa.blizko .hlava{box-shadow:0 0 0 4px rgba(90,200,250,.45),0 4px 10px rgba(0,0,0,.3)}
+@keyframes tocka{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+
+/* Panáček */
+.hrac{width:56px;height:84px;position:relative;pointer-events:none}
+.hrac svg{width:100%;height:100%;overflow:visible}
+.hrac .noha-l,.hrac .noha-p,.hrac .ruka-l,.hrac .ruka-p{transform-box:fill-box;transform-origin:50% 0}
+.hrac.jde .noha-l{animation:krok .5s ease-in-out infinite}
+.hrac.jde .noha-p{animation:krok .5s ease-in-out infinite reverse}
+.hrac.jde .ruka-l{animation:krok .5s ease-in-out infinite reverse}
+.hrac.jde .ruka-p{animation:krok .5s ease-in-out infinite}
+.hrac.jde .telo{animation:poskok .25s ease-in-out infinite alternate}
+.hrac .otoc{transition:transform .2s;transform-origin:28px 50px}
+.hrac.vlevo .otoc{transform:scaleX(-1)}
+@keyframes krok{0%{transform:rotate(-22deg)}100%{transform:rotate(22deg)}}
+@keyframes poskok{0%{transform:translateY(0)}100%{transform:translateY(-2px)}}
+
+/* ---------- Vrstvy, karty ---------- */
+.vrstva{position:fixed;inset:0;z-index:30;background:rgba(20,18,45,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:grid;place-items:center;padding:24px}
+.karta{background:var(--karta);border-radius:26px;padding:26px 22px 20px;width:min(360px,100%);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:vyskoc .3s cubic-bezier(.2,1.4,.4,1)}
+.karta .samolepka.velka{margin:0 auto 10px}
+.karta h3{margin:6px 0 6px;font-size:24px}
+@keyframes vyskoc{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.tlac{display:inline-block;background:var(--fialova);color:#fff;font-weight:700;padding:13px 26px;border-radius:24px;margin-top:12px;box-shadow:0 4px 0 #4b3bc4}
+.tlac:active{transform:translateY(3px);box-shadow:0 1px 0 #4b3bc4}
+.tlac.velke{font-size:20px;padding:16px 56px;background:var(--zluta);color:var(--tma);box-shadow:0 5px 0 #d9a91c}
+.tlac.male{padding:8px 14px;font-size:14px;margin:0}
+.tlac.cervene{background:#ff453a;box-shadow:0 3px 0 #b8261d}
+.odkaz{color:#fff;opacity:.8;text-decoration:underline;margin-top:16px;font-size:15px}
+.stitek{display:inline-block;font-size:12px;font-weight:800;padding:4px 10px;border-radius:12px;color:#fff;background:var(--sede)}
+
+#menu{background:rgba(20,18,45,.7);align-content:end;padding-bottom:calc(var(--sb) + 30px)}
+.menu-mrizka{display:flex;gap:14px;justify-content:center;margin-bottom:26px}
+.menu-mrizka button{width:96px;height:96px;border-radius:24px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.3);animation:vyskoc .25s backwards}
+.menu-mrizka button:nth-child(2){animation-delay:.04s}.menu-mrizka button:nth-child(3){animation-delay:.08s}
+.menu-mrizka .ik{font-size:34px}
+.zavrit-kulate{width:62px;height:62px;border-radius:50%;background:#fff;font-size:24px;font-weight:700;margin:0 auto;display:block;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+
+/* ---------- Obrazovky ---------- */
+.obrazovka{position:fixed;inset:0;z-index:20;background:#f4f3fa;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--sb) + 30px)}
+.obrazovka header{position:sticky;top:0;display:flex;align-items:center;gap:10px;padding:calc(var(--st) + 10px) 14px 12px;background:#f4f3fa;z-index:2}
+.obrazovka h2{flex:1;margin:0;font-size:22px}
+.zpet{width:40px;height:40px;border-radius:50%;background:#fff;font-size:28px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+#albumPocet{font-weight:800;color:var(--fialova)}
+.album-mrizka{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:6px 14px}
+.album-karta{background:#fff;border-radius:18px;padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.album-karta .samolepka{width:70px;height:70px;font-size:40px;border-width:4px;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+.album-karta .jm{font-size:12px;font-weight:700;text-align:center;line-height:1.2;min-height:2.4em}
+.album-karta .pc{font-size:11px;color:var(--sede)}
+.album-karta.nechyceno .samolepka{background:#e7e6ef;border-color:#d8d7e3;box-shadow:none}
+.album-karta.nechyceno .samolepka>*{filter:brightness(0) opacity(.18)}
+.album-karta.nechyceno .samolepka::after{display:none}
+.seznam{padding:6px 14px;display:flex;flex-direction:column;gap:10px}
+.polozka{background:#fff;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.polozka>div:first-child{flex:1}
+.polozka .lapka.mala,.polozka .ik-velka{flex:none}
+.polozka>div:nth-child(2){flex:1}
+.ik-velka{font-size:30px}
+.polozka input:not([type]){border:1px solid #ddd;border-radius:10px;padding:8px 10px;width:150px}
+.radek{display:flex;gap:8px}
+.prepinac{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:15px;background:#d8d7e3;position:relative;flex:none;transition:.2s;margin:0}
+.prepinac::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.prepinac:checked{background:var(--tyrkys)}
+.prepinac:checked::after{left:23px}
+
+/* ---------- Lepárna ---------- */
+.disk{width:170px;height:170px;border-radius:50%;margin:16px auto;border:8px solid #fff;
+  background:conic-gradient(#5ac8fa 0 25%,#6c5ce7 0 50%,#1fc8b0 0 75%,#ffd84d 0);box-shadow:0 8px 20px rgba(0,0,0,.25);display:grid;place-items:center;touch-action:none;cursor:grab}
+.disk span{width:60px;height:60px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:30px;color:var(--fialova)}
+.disk.pouzity{filter:grayscale(.8) opacity(.6)}
+
+/* ---------- Chytání ---------- */
+#lov{position:fixed;inset:0;z-index:40;overflow:hidden;touch-action:none}
+.lov-nebe{position:absolute;inset:0 0 40% 0;background:linear-gradient(#7fd3ff,#cfefff)}
+.lov-zeme{position:absolute;inset:60% 0 0 0;background:radial-gradient(ellipse at 50% 0%,#a5e27c,#5fb84a 70%)}
+.lov-horni{position:absolute;left:12px;right:12px;top:calc(var(--st) + 10px);display:flex;justify-content:space-between;align-items:center;z-index:3}
+.kulate{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.9);font-size:22px;box-shadow:0 3px 10px rgba(0,0,0,.2);position:relative}
+.kulate small{position:absolute;right:-4px;bottom:-4px;background:var(--tma);color:#fff;font-size:11px;font-weight:800;border-radius:10px;padding:1px 6px}
+.kulate.aktivni{background:var(--zluta);box-shadow:0 0 0 4px rgba(255,216,77,.5)}
+.lov-info{text-align:center;background:rgba(255,255,255,.9);padding:6px 14px;border-radius:18px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.lov-info b{font-size:16px}
+#lovTvorObal{position:absolute;left:50%;top:44%;width:150px;height:150px;transform:translate(-50%,-50%)}
+#lovTvor{position:absolute;inset:0;width:150px;height:150px;font-size:88px;border-width:8px;transition:transform .35s cubic-bezier(.5,-.4,.6,1),opacity .35s}
+#lovTvorObal.uhyba{animation:uhyb2 2.6s ease-in-out infinite}
+#lovTvorObal.poskakuje{animation:poskTvor2 1.4s ease-in-out infinite}
+@keyframes uhyb2{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(calc(-50% - 70px),-50%) rotate(-8deg)}50%{transform:translate(-50%,-50%)}75%{transform:translate(calc(-50% + 70px),-50%) rotate(8deg)}}
+@keyframes poskTvor2{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 16px))}}
+#lovTvor.dovnitr{transform:scale(0) translateY(60px)!important;opacity:0;animation:none}
+#lovTvor.utika{transform:translateY(-120vh) scale(.4)!important;transition:transform .8s ease-in;animation:none}
+@keyframes uhyb{0%,100%{transform:translateX(0)}25%{transform:translateX(-70px) rotate(-8deg)}50%{transform:translateX(0)}75%{transform:translateX(70px) rotate(8deg)}}
+@keyframes poskTvor{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+#lovStin{position:absolute;left:20%;right:20%;bottom:-22px;height:20px;border-radius:50%;background:rgba(0,0,0,.25)}
+#lovKruh{position:absolute;inset:-18px;border-radius:50%;border:4px solid rgba(255,255,255,.85);pointer-events:none}
+#lovKruh i{position:absolute;left:50%;top:50%;width:100%;height:100%;border-radius:50%;border:6px solid var(--k,#4cd964);transform:translate(-50%,-50%) scale(1)}
+#lovHlaska{position:absolute;left:0;right:0;top:24%;text-align:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25),0 0 18px rgba(108,92,231,.6);
+  opacity:0;transform:scale(.6);transition:.25s;pointer-events:none;z-index:4}
+#lovHlaska.vid{opacity:1;transform:scale(1)}
+#lovMic{position:absolute;left:50%;top:0;margin:0;transform:translate(-50%,-50%);z-index:5;touch-action:none;cursor:grab;will-change:transform}
+#lovMic.trese{animation:treseni .6s ease-in-out}
+#lovMic.otevreny{filter:brightness(1.6)}
+@keyframes treseni{0%,100%{rotate:0deg}20%{rotate:-28deg}45%{rotate:24deg}70%{rotate:-12deg}}
+#lovLapky{position:absolute;left:0;right:0;bottom:calc(var(--sb) + 14px);text-align:center;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.hvezdy{position:absolute;pointer-events:none;font-size:26px;z-index:6;animation:hvezda 0.9s ease-out forwards}
+@keyframes hvezda{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
+.zablesk{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:7;animation:zablesk .4s}
+@keyframes zablesk{0%{opacity:.85}100%{opacity:0}}
+
+/* ---------- Úvod ---------- */
+#uvod{position:fixed;inset:0;z-index:80;display:grid;place-items:center;text-align:center;color:#fff;
+  background:radial-gradient(circle at 30% 20%,#8a7bff,transparent 50%),radial-gradient(circle at 80% 90%,#1fc8b0,transparent 45%),var(--tma);padding:24px}
+.uvod-obsah{max-width:360px}
+.uvod-samolepky{display:flex;justify-content:center;gap:4px;margin-bottom:10px}
+.uvod-samolepky span{width:74px;height:74px;border-radius:50%;background:#fff;border:5px solid var(--zluta);display:grid;place-items:center;font-size:42px;box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.uvod-samolepky span:nth-child(1){transform:rotate(-12deg) translateY(8px);border-color:#5ac8fa}
+.uvod-samolepky span:nth-child(3){transform:rotate(12deg) translateY(8px);border-color:#ff9cf0}
+#uvod h1{font-size:46px;line-height:1;margin:16px 0 12px;letter-spacing:-.02em}
+#uvod p{opacity:.85;line-height:1.4}
+#uvod .tlac.velke{margin-top:18px}
+#uvod .odkaz{display:block;margin:18px auto 0}
+
+/* Fotky lidí a hodnoty */
+.samolepka img.vyplnit{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+#lovSila{position:absolute;left:0;right:0;top:calc(44% - 128px);text-align:center;color:#fff;font-weight:900;font-size:22px;letter-spacing:.03em;text-shadow:0 2px 4px rgba(0,0,0,.35);z-index:3}
+.hodnoty{font-size:14px}
+.hodnoty-mrizka{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.hodnoty-mrizka div{background:#f4f3fa;border-radius:12px;padding:8px 4px;display:flex;flex-direction:column}
+.hodnoty-mrizka b{font-size:18px}.hodnoty-mrizka small{font-size:11px;color:var(--sede)}
+
+/* Obloha nad obzorem a jemné ztmavení okrajů – mapa vypadá jako herní svět */
+#nebe{position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,#7cc8ff 0%,#a9dcff 9%,rgba(200,236,255,.85) 15%,rgba(220,245,255,0) 30%),
+             radial-gradient(ellipse at 50% 65%,transparent 55%,rgba(20,40,60,.22) 100%)}
+.hrac{width:66px;height:98px}
+#okoli{max-width:32vw;bottom:calc(var(--sb) + 110px)}
+.tvor-mapa .samolepka{width:58px;height:58px}
+.zast-mapa .hlava{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9be7ff,#2a8fdb 70%);font-size:22px}
+.zast-mapa .noha{height:34px;width:7px;background:linear-gradient(90deg,#cfd8ff,#fff,#b8c2ee)}
+.zast-mapa.pouzita .hlava{background:radial-gradient(circle at 35% 30%,#e3ccff,#8a5ce0 70%)}
+
+.hrac{width:70px;height:110px}
+.hrac .otoc{transform-origin:32px 60px}
+.hrac .kuzel{position:absolute;left:50%;bottom:-48px;width:130px;height:130px;margin-bottom:0;opacity:0;transition:opacity .3s;
+  transform-origin:50% 50%;border-radius:50%;
+  background:conic-gradient(from -28deg,rgba(80,170,255,.55) 0 56deg,transparent 56deg);
+  -webkit-mask:radial-gradient(circle,#000 0 58%,transparent 70%);mask:radial-gradient(circle,#000 0 58%,transparent 70%)}
+
+/* ===== Vylepšení vzhledu (23. 11. 2026) ===== */
+/* Profil */
+#profil{padding:5px 16px 5px 5px;background:linear-gradient(135deg,rgba(40,36,90,.92),rgba(28,27,58,.92));border:1.5px solid rgba(255,255,255,.18)}
+.profil-ava{position:relative;width:46px;height:46px;border-radius:50%;background:linear-gradient(160deg,#cfe9ff,#9fd0ff);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.profil-ava svg{width:100%;height:100%;border-radius:50%}
+.profil-ava #lvl{position:absolute;right:-8px;bottom:-6px;width:24px;height:24px;font-size:12px;border-width:2px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.xpbar{width:110px;height:8px;background:rgba(255,255,255,.15);box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+.xpbar i{background:linear-gradient(90deg,#1fc8b0,#7cf0d8);box-shadow:0 0 8px rgba(31,200,176,.7)}
+#xpText{font-size:10px;font-weight:700;opacity:.65;text-align:left;margin-top:2px}
+
+/* Spodní ztmavení kvůli čitelnosti + tlačítko menu */
+body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;pointer-events:none;z-index:2;background:linear-gradient(transparent,rgba(20,30,40,.18))}
+#menuBtn{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0}
+#menuBtn::before{content:"";position:absolute;inset:-9px;border-radius:50%;border:3px solid rgba(255,255,255,.75);box-shadow:0 0 0 6px rgba(255,255,255,.18),0 6px 16px rgba(0,0,0,.25);animation:menuPulz 2.6s ease-in-out infinite}
+#menuBtn .lapka{width:70px;height:70px;border-width:4px}
+@keyframes menuPulz{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.pocitadlo{left:calc(50% + 28px);bottom:calc(var(--sb) + 78px);background:linear-gradient(#3a3480,#1c1b3a)}
+
+/* Kompas */
+#kompas{background:radial-gradient(circle at 40% 35%,#fff,#e6e9f5);border:2px solid #fff}
+#kompas span{font-size:13px}
+#kompas span::before{content:"";display:block;width:0;height:0;margin:0 auto 1px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #ff3b30}
+
+/* V okolí */
+#okoli{background:rgba(255,255,255,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid #fff;border-radius:18px;padding:8px 10px 6px}
+#okoliSeznam{gap:6px}
+.okoli-kus{display:flex;flex-direction:column;align-items:center;gap:1px}
+#okoliSeznam span{width:34px;height:34px;background:#fff;border:2.5px solid var(--b,#ddd);box-shadow:0 2px 5px rgba(0,0,0,.15)}
+#okoliSeznam span img.vyplnit{object-fit:cover;object-position:50% 18%}
+.okoli-kus .vzd{font-size:10px;line-height:10px;font-weight:900;color:#6c5ce7;letter-spacing:1px;height:10px}
+
+/* Samolepky na mapě */
+.tvor-mapa{width:72px;height:92px}
+.tvor-mapa .samolepka{width:60px;height:60px;border-width:4px;box-shadow:0 0 0 2px rgba(0,0,0,.08),0 8px 14px rgba(0,0,0,.3);z-index:2}
+.samolepka .lesk{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:linear-gradient(130deg,rgba(255,255,255,.75) 0 18%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 70%,rgba(255,255,255,.25) 85%);z-index:3}
+.tvor-mapa .trava{position:absolute;bottom:4px;left:50%;width:58px;transform:translateX(-50%);z-index:3;pointer-events:none}
+.tvor-mapa .stin{position:absolute;bottom:2px;width:40px;height:10px}
+.tvor-mapa.objevi{animation:objevi .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes objevi{0%{transform:scale(0) translateY(20px);opacity:0}100%{transform:scale(1);opacity:1}}
+.tvor-mapa.vz-vzacna .samolepka{box-shadow:0 0 14px 3px rgba(255,159,10,.7),0 8px 14px rgba(0,0,0,.3)}
+.tvor-mapa.vz-epicka .samolepka{box-shadow:0 0 16px 4px rgba(191,90,242,.8),0 8px 14px rgba(0,0,0,.3)}
+.tvor-mapa.vz-legendarni .samolepka{box-shadow:0 0 18px 5px rgba(255,55,95,.8),0 8px 14px rgba(0,0,0,.3)}
+.trpyt{position:absolute;font-style:normal;color:#fff;text-shadow:0 0 6px #ffd84d;font-size:14px;z-index:4;animation:trpyt 1.8s ease-in-out infinite;pointer-events:none}
+.trpyt.t1{left:2px;top:18px}.trpyt.t2{right:2px;top:8px;animation-delay:.6s;font-size:11px}.trpyt.t3{right:8px;top:48px;animation-delay:1.2s;font-size:10px}
+@keyframes trpyt{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(45deg)}}
+.tvor-mapa.blizko .samolepka{border-color:#fff;outline:3px solid var(--tyrkys);outline-offset:2px}
+
+/* Lepárny */
+.zast-mapa{width:60px;height:104px}
+.zast-mapa .zare{position:absolute;bottom:0;left:50%;width:56px;height:18px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(rgba(90,200,250,.6),transparent 70%)}
+.zast-mapa .disk-mapa{position:relative;width:46px;height:46px;animation:vznasi 2.4s ease-in-out infinite;perspective:200px;z-index:2}
+.zast-mapa .disk-lic{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 50%,#fff 0 30%,transparent 31%),conic-gradient(#5ac8fa 0 25%,#2a6fdb 0 50%,#5ac8fa 0 75%,#2a6fdb 0);
+  border:3px solid #fff;box-shadow:0 0 12px rgba(90,200,250,.8),0 4px 8px rgba(0,0,0,.25);animation:tocka 3.2s linear infinite}
+.zast-mapa .disk-lic span{color:#2a6fdb;font-size:16px;font-weight:900}
+.zast-mapa .disk-hrana{display:none}
+.zast-mapa .noha{width:6px;height:34px;margin-top:-2px;background:linear-gradient(90deg,#9fb4e8,#fff 45%,#8ea3da);border-radius:3px}
+.zast-mapa .podstavec{width:30px;height:10px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#fff,#a9b8e6);box-shadow:0 2px 3px rgba(0,0,0,.25)}
+.zast-mapa.pouzita .disk-lic{background:radial-gradient(circle at 50% 50%,#fff 0 30%,transparent 31%),conic-gradient(#d2b6ff 0 25%,#8a5ce0 0 50%,#d2b6ff 0 75%,#8a5ce0 0);box-shadow:0 0 10px rgba(138,92,224,.6);animation:none}
+.zast-mapa.pouzita .disk-lic span{color:#8a5ce0}
+.zast-mapa.pouzita .zare{background:radial-gradient(rgba(138,92,224,.45),transparent 70%)}
+.zast-mapa.blizko .disk-lic{box-shadow:0 0 0 4px rgba(255,255,255,.7),0 0 18px rgba(90,200,250,1)}
+@keyframes vznasi{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* Chytání – krajina */
+.lov-nebe,.lov-zeme{display:none}
+.lov-krajina{position:absolute;inset:0;width:100%;height:100%}
+.mrak{animation:mrak 40s linear infinite}
+.mrak.m2{animation-duration:55s;animation-delay:-20s}.mrak.m3{animation-duration:70s;animation-delay:-35s}
+@keyframes mrak{0%{transform:translateX(-160px)}100%{transform:translateX(460px)}}
+.lov-plosina{position:absolute;left:50%;top:calc(44% + 62px);width:230px;height:54px;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(ellipse at 50% 40%,#d4f7a8,#8fd76a 60%,#6dbf4f);box-shadow:0 6px 0 rgba(0,0,0,.08),inset 0 -6px 10px rgba(0,0,0,.08)}
+#lovStin{bottom:-14px;background:rgba(30,60,20,.3);filter:blur(2px)}
+#lovTvorObal{z-index:2}
+#lovTvor{box-shadow:0 0 0 3px rgba(0,0,0,.06),0 14px 24px rgba(0,0,0,.25)}
+#lovTvor::before{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(130deg,rgba(255,255,255,.7) 0 16%,transparent 30%);z-index:2;pointer-events:none}
+#lovKruh{border:3px solid rgba(255,255,255,.9);box-shadow:0 0 0 2px rgba(0,0,0,.05)}
+#lovKruh i{border-width:5px;box-shadow:0 0 12px var(--k)}
+#lovSila{font-size:24px;text-shadow:0 2px 0 rgba(0,0,0,.15),0 2px 10px rgba(0,60,120,.35)}
+.lov-info{box-shadow:0 3px 10px rgba(0,0,0,.15);border:1.5px solid #fff}
+.stopa{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(#fff,rgba(79,240,211,.6) 50%,transparent 70%);pointer-events:none;z-index:4;animation:stopa .45s ease-out forwards}
+@keyframes stopa{to{opacity:0;width:4px;height:4px}}
+.lapka{background:radial-gradient(circle at 30% 26%,rgba(255,255,255,.95) 0 6%,rgba(255,255,255,.35) 12%,transparent 22%),
+  radial-gradient(circle at 50% 50%,var(--zluta) 0 24%,#f5a623 25% 28%,transparent 29%),
+  radial-gradient(circle at 40% 35%,#6ff7de,#18b39f 55%,#0b7f71)}
+
+/* Výsledek chytání */
+#lovVysledek .karta{overflow:hidden;position:relative;padding-top:34px}
+#lovVysledek .karta::before{content:"";position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(var(--vz,#6c5ce7),transparent);opacity:.35}
+#lovVysledek .samolepka.velka{position:relative;animation:vyskoc .5s cubic-bezier(.2,1.6,.4,1) .1s backwards}
+.stuha{position:absolute;top:14px;right:-34px;transform:rotate(35deg);background:var(--vz,#6c5ce7);color:#fff;font-weight:800;font-size:11px;padding:4px 40px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.konfeta{position:fixed;top:-12px;width:8px;height:12px;border-radius:2px;z-index:50;pointer-events:none;animation:konfeta 2.2s ease-in forwards}
+@keyframes konfeta{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--x),105vh) rotate(var(--r))}}
+
+/* Album – jemnější karty */
+.album-karta{border:1.5px solid #eceaf6;transition:transform .15s}
+.album-karta:active{transform:scale(.95)}
+.album-karta:not(.nechyceno) .samolepka::before{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(130deg,rgba(255,255,255,.7) 0 16%,transparent 30%);z-index:2}
+
+#nacitani{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(circle at 50% 40%,#b6eba0,#7fcf6a);color:#1f4a1f;font-size:18px}
+#nacitani .lapka{animation:nacita 1s ease-in-out infinite}
+@keyframes nacita{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-18px) rotate(180deg)}}
+
+/* ===== Výstřižky postav (bez kolečka) ===== */
+.postava-img{display:block;pointer-events:none;-webkit-user-drag:none;
+  filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 8px 8px rgba(0,0,0,.28))}
+/* na mapě: vznáší se nad zemí, stín dýchá */
+.tvor-mapa.postava-mapa{width:90px;height:118px}
+.postava-mapa .postava{position:relative;height:92px;display:flex;align-items:flex-end;justify-content:center;animation:levituje 2.6s ease-in-out infinite;margin-bottom:10px;z-index:2}
+.postava-mapa .postava-img{max-height:92px;max-width:86px}
+.postava-mapa .stin{position:absolute;bottom:0;width:46px;height:11px;animation:stinLev 2.6s ease-in-out infinite}
+@keyframes levituje{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes stinLev{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.6}}
+.postava-mapa.vz-neobvykla .postava-img{filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 0 8px rgba(255,214,10,.9))}
+.postava-mapa.vz-vzacna .postava-img{filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 0 10px rgba(255,159,10,1))}
+.postava-mapa.vz-epicka .postava-img{filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 0 12px rgba(191,90,242,1))}
+.postava-mapa.vz-legendarni .postava-img{filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 0 14px rgba(255,55,95,1))}
+.postava-mapa.blizko .postava{animation:levituje 1.3s ease-in-out infinite}
+.postava-mapa.blizko .stin{background:radial-gradient(rgba(31,200,176,.7),rgba(31,200,176,0) 70%);height:14px;width:60px}
+.postava-mapa .trpyt.t1{top:30px}.postava-mapa .trpyt.t3{top:70px}
+/* při chytání: stojí na kopečku */
+#lovTvor.postava-lov{position:absolute;inset:auto 0 0 0;width:150px;height:auto;display:flex;justify-content:center;align-items:flex-end;background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;font-size:0;
+  transform-origin:50% 100%;animation:dychani 3s ease-in-out infinite}
+#lovTvor.postava-lov::before,#lovTvor.postava-lov::after{display:none}
+#lovTvor.postava-lov .postava-img{max-height:min(270px,36vh);max-width:230px;filter:drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(0 12px 12px rgba(0,0,0,.25))}
+#lovTvor.postava-lov.dovnitr{transform:scale(0) translateY(-40px)!important}
+@keyframes dychani{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-8px) scaleY(1.015)}}
+.postava-karta{display:flex;justify-content:center;margin:0 auto 6px;position:relative}
+.postava-karta .postava-img{max-height:190px;max-width:220px}
+
+#lov.je-postava #lovTvor.postava-lov .postava-img{max-height:min(210px,28vh);max-width:200px}
+#lov.je-postava #lovSila{top:calc(44% - 178px)}
+#lov.je-postava #lovKruh{inset:auto;left:-25px;top:-62px;width:200px;height:200px;z-index:3}
+#lov.je-postava #lovStin{bottom:-10px}
