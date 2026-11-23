@@ -409,3 +409,12 @@ body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;point
 .vybuch{position:absolute;width:40px;height:40px;border-radius:50%;border:4px solid #fff;pointer-events:none;z-index:6;
   transform:translate(-50%,-50%);animation:vybuch .5s ease-out forwards;box-shadow:0 0 20px #7ff9e3}
 @keyframes vybuch{to{width:220px;height:220px;opacity:0;border-width:1px}}
+
+/* Příspěvek na vývoj */
+.prispevek-uvod{display:flex;align-items:center;gap:12px;margin:22px auto 0;padding:10px 14px 10px 10px;max-width:320px;text-align:left;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:18px}
+.prispevek-uvod img{width:84px;height:84px;border-radius:10px;background:#fff;flex:none}
+.prispevek-uvod b{display:block;font-size:15px}
+.prispevek-uvod span{font-size:12px;opacity:.75}
+.menu-mrizka{flex-wrap:wrap;padding:0 16px}
+.qr-velky{width:min(260px,70vw);height:auto;display:block;margin:10px auto 0;border-radius:12px}

@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="ikony/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="ikony/ikona-192.png">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="styl.css?v=6">
+<link rel="stylesheet" href="styl.css?v=7">
 </head>
 <body>
 
@@ -53,6 +53,7 @@
     <button data-otevri="album"><span class="ik">📒</span>Album</button>
     <button data-otevri="batoh"><span class="ik">🎒</span>Batoh</button>
     <button data-otevri="nastaveni"><span class="ik">⚙️</span>Nastavení</button>
+    <button data-otevri="prispevek"><span class="ik">💜</span>Přispěj</button>
   </div>
   <button class="zavrit-kulate" data-zavri>✕</button>
 </div>
@@ -99,6 +100,16 @@
   </div>
   <p class="sede stred" id="verze"></p>
 </section>
+
+<!-- Příspěvek na vývoj -->
+<div id="prispevek" class="vrstva skryto">
+  <div class="karta">
+    <h3>Přispěj na vývoj aplikace</h3>
+    <p class="sede">Naskenuj QR kód v aplikaci své banky. Díky!</p>
+    <img class="qr-velky" src="obrazky/qr-prispevek.png" alt="QR kód pro příspěvek">
+    <button class="tlac" data-zavri>Zavřít</button>
+  </div>
+</div>
 
 <!-- Lepárna (zastávka) -->
 <div id="lepar" class="vrstva skryto">
@@ -170,11 +181,15 @@
     <button id="btnHrat" class="tlac velke">Hrát</button>
     <button id="btnTest" class="odkaz">Zkusit bez GPS</button>
     <p id="uvodInstal" class="sede male"></p>
+    <div class="prispevek-uvod">
+      <img src="obrazky/qr-prispevek.png" alt="QR kód pro příspěvek">
+      <div><b>Přispěj na vývoj aplikace</b><span>Naskenuj QR kód v aplikaci banky.</span></div>
+    </div>
   </div>
 </section>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<script src="samolepky.js?v=6"></script>
-<script src="hra.js?v=6"></script>
+<script src="samolepky.js?v=7"></script>
+<script src="hra.js?v=7"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // Offline základ hry. Vlastní soubory: nejdřív síť (ať se hned projeví úpravy), jinak uložená kopie.
-const CACHE = 'lovci-v6';
-const ZAKLAD = ['./', 'index.html', 'styl.css?v=6', 'hra.js?v=6', 'samolepky.js?v=6', 'manifest.webmanifest', 'ikony/ikona-192.png',
+const CACHE = 'lovci-v7';
+const ZAKLAD = ['./', 'index.html', 'styl.css?v=7', 'hra.js?v=7', 'samolepky.js?v=7', 'manifest.webmanifest', 'ikony/ikona-192.png',
   'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js', 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ZAKLAD)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x))))); self.clients.claim(); });
