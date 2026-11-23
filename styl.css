@@ -379,3 +379,33 @@ body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;point
 .tvor-mapa.postava-mapa{width:70px;height:96px}
 .postava-mapa .postava{height:70px}
 .postava-mapa .postava-img{max-height:70px;max-width:66px}
+
+/* ===== Lapka 3D (lesklá koule) ===== */
+.lapka{border:0;overflow:hidden;
+  background:
+    radial-gradient(circle at 30% 24%,#fff 0 5%,rgba(255,255,255,.75) 9%,rgba(255,255,255,0) 22%),
+    radial-gradient(circle at 72% 86%,rgba(190,255,245,.55) 0 8%,rgba(190,255,245,0) 26%),
+    radial-gradient(circle at 42% 36%,#8dfbe6 0%,#2fd1b8 28%,#109c88 58%,#06574d 100%);
+  box-shadow:inset -6px -9px 14px rgba(0,40,35,.45),inset 4px 5px 10px rgba(255,255,255,.35),0 0 0 3px #fff,0 8px 16px rgba(0,0,0,.35)}
+/* zakřivený šev */
+.lapka::before{content:"";position:absolute;left:-12%;top:-30%;width:58%;height:160%;border-radius:50%;
+  border-right:3px solid rgba(255,255,255,.85);transform:rotate(-24deg);box-shadow:4px 0 6px -3px rgba(0,60,50,.5);pointer-events:none}
+/* kovový medailon s hvězdou */
+.lapka::after{content:"★";position:absolute;inset:auto;left:50%;top:52%;width:38%;height:38%;transform:translate(-44%,-50%);
+  display:grid;place-items:center;border-radius:50%;color:#fff;font-size:26%;
+  font-size:min(16px,1em);
+  background:radial-gradient(circle at 35% 30%,#fff6c4,#ffd84d 35%,#e39a12 80%,#a8670a);
+  box-shadow:0 0 0 2px #fff,0 2px 4px rgba(0,0,0,.35),inset 0 -2px 3px rgba(120,60,0,.4);text-shadow:0 1px 1px rgba(120,60,0,.6)}
+.lapka.velka::after{font-size:18px}
+.lapka.mala::after{font-size:9px}
+#menuBtn .lapka::after{font-size:15px}
+.lapka.velka{box-shadow:inset -9px -13px 20px rgba(0,40,35,.45),inset 6px 7px 14px rgba(255,255,255,.35),0 0 0 4px #fff,0 12px 22px rgba(0,0,0,.35)}
+
+/* při chytání: lapka čeká a pohupuje se, kolem ní jemná záře */
+#lovMic:not(.trese):not(.otevreny){animation:cekaMic 1.8s ease-in-out infinite}
+@keyframes cekaMic{0%,100%{margin-top:0}50%{margin-top:-6px}}
+#lovMic.otevreny{filter:brightness(1.8) drop-shadow(0 0 18px #7ff9e3)}
+#lovMic.trese{animation:treseni .6s ease-in-out}
+.vybuch{position:absolute;width:40px;height:40px;border-radius:50%;border:4px solid #fff;pointer-events:none;z-index:6;
+  transform:translate(-50%,-50%);animation:vybuch .5s ease-out forwards;box-shadow:0 0 20px #7ff9e3}
+@keyframes vybuch{to{width:220px;height:220px;opacity:0;border-width:1px}}

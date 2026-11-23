@@ -659,6 +659,7 @@ async function zasah(x, y, kruhK) {
   $('#lovKruh').style.display = 'none';
   const zab = document.createElement('div'); zab.className = 'zablesk'; $('#lov').appendChild(zab); setTimeout(() => zab.remove(), 400);
   const m = $('#lovMic'); m.classList.add('otevreny');
+  const vb = document.createElement('i'); vb.className = 'vybuch'; vb.style.left = x + 'px'; vb.style.top = y + 'px'; $('#lov').appendChild(vb); setTimeout(() => vb.remove(), 600);
   await spi(350);
   m.classList.remove('otevreny');
   // spadne na zem
