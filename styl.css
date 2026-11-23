@@ -373,3 +373,9 @@ body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;point
 .uvod-samolepky img:nth-child(1){transform:rotate(-8deg);max-height:110px;animation-delay:-.9s}
 .uvod-samolepky img:nth-child(2){max-height:150px;z-index:1;margin:0 -14px}
 .uvod-samolepky img:nth-child(3){max-height:115px;animation-delay:-1.7s}
+
+/* Značky na mapě musí mít pevnou polohu (jinak se řadí pod sebe a jsou posunuté) */
+.maplibregl-marker{position:absolute!important;top:0;left:0}
+.tvor-mapa.postava-mapa{width:70px;height:96px}
+.postava-mapa .postava{height:70px}
+.postava-mapa .postava-img{max-height:70px;max-width:66px}

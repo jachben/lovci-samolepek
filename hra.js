@@ -38,8 +38,8 @@ function hodnotyKusu(druh, id) {
 }
 
 const NAST = {
-  dosahChytani: 45,      // m – jak blízko musíš být k samolepce
-  dosahZastavky: 45,     // m – jak blízko k Lepárně
+  dosahChytani: 55,      // m – jak blízko musíš být k samolepce
+  dosahZastavky: 55,     // m – jak blízko k Lepárně
   viditelnost: 320,      // m – do jaké vzdálenosti vidíš samolepky
   viditZastavky: 700,
   slotMs: 10 * 60e3,     // samolepka vydrží 10 minut
@@ -322,6 +322,9 @@ function ovladaniMapy() {
   const konec = e => {
     if (!prsty.has(e.pointerId)) return;
     prsty.delete(e.pointerId);
+    if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && !stav.test && !napovedaChuze) {
+      napovedaChuze = true; toast('Panáček chodí s tebou podle GPS. Na zkoušku doma: Menu → Nastavení → Zkušební procházka', 4500);
+    }
     if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && stav.test) {
       const r = c.getBoundingClientRect();
       const ll = mapa.unproject([e.clientX - r.left, e.clientY - r.top]);
@@ -336,9 +339,10 @@ function ovladaniMapy() {
 // ---------- Plynulý pohyb panáčka a kamery ----------
 let posledniPulz = 0, posledniSnimek = performance.now(), posledniDosah = null, posledniObnova = 0, posledniObnovaPoz = null;
 function smycka(t) {
-  const dt = Math.min(0.1, (t - posledniSnimek) / 1000); posledniSnimek = t;
+  const dtSkut = Math.min(1, (t - posledniSnimek) / 1000);
+  const dt = Math.min(0.1, dtSkut); posledniSnimek = t;
   if (stav.test && cilChuze && poloha) {
-    const d = vzdal(poloha, cilChuze), krok = NAST.rychlostTest * dt;
+    const d = vzdal(poloha, cilChuze), krok = NAST.rychlostTest * dtSkut;
     if (d <= krok) { poloha = cilChuze; cilChuze = null; } else poloha = posun(poloha, krok, smer(poloha, cilChuze));
     stav.testPoz = poloha;
   }
@@ -396,7 +400,7 @@ function obnovZnacky(hned) {
       el.insertAdjacentHTML('beforeend', (s.druh.vystrizek ? '' : TRAVA_SVG) + '<div class="stin"></div>' + (['vzacna', 'epicka', 'legendarni'].includes(s.druh.vzacnost) ? '<i class="trpyt t1">✦</i><i class="trpyt t2">✧</i><i class="trpyt t3">✦</i>' : ''));
       setTimeout(() => el.classList.remove('objevi'), 700);
       el.querySelector('.samolepka, .postava').style.animationDelay = (-Math.random() * 2) + 's';
-      el.addEventListener('click', ev => { ev.stopPropagation(); klikNaTvora(s.id); });
+      naTuk(el, () => klikNaTvora(s.id));
       const marker = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }).setLngLat(s.poz).addTo(mapa);
       z = { marker, el, typ: 'tvor' }; znacky.set(s.id, z);
     }
@@ -412,7 +416,7 @@ function obnovZnacky(hned) {
       const el = document.createElement('div');
       el.className = 'znacka zast-mapa';
       el.innerHTML = '<div class="zare"></div><div class="disk-mapa"><div class="disk-lic"><span>★</span></div><div class="disk-hrana"></div></div><div class="noha"></div><div class="podstavec"></div>';
-      el.addEventListener('click', ev => { ev.stopPropagation(); klikNaZastavku(s.id); });
+      naTuk(el, () => klikNaZastavku(s.id));
       const marker = new maplibregl.Marker({ element: el, anchor: 'bottom', pitchAlignment: 'viewport', rotationAlignment: 'viewport' }).setLngLat(s.poz).addTo(mapa);
       z = { marker, el, typ: 'zast' }; znacky.set(s.id, z);
     }
@@ -422,6 +426,21 @@ function obnovZnacky(hned) {
   }
   for (const [id, z] of znacky) if (!zustava.has(id)) { z.marker.remove(); znacky.delete(id); }
   obnovOkoli(tvory);
+}
+
+// Spolehlivé ťuknutí na značku i v mobilu (mapa jinak ťuknutí „sní“)
+function naTuk(el, fn) {
+  let st = null;
+  const stop = e => e.stopPropagation();
+  el.addEventListener('touchstart', stop, { passive: true });
+  el.addEventListener('mousedown', stop);
+  el.addEventListener('pointerdown', e => { e.stopPropagation(); st = { x: e.clientX, y: e.clientY, t: Date.now() }; });
+  el.addEventListener('pointerup', e => {
+    e.stopPropagation();
+    if (st && Math.abs(e.clientX - st.x) + Math.abs(e.clientY - st.y) < 14 && Date.now() - st.t < 700) fn();
+    st = null;
+  });
+  el.addEventListener('click', e => e.stopPropagation());
 }
 
 function obnovOkoli(tvory) {
@@ -782,6 +801,7 @@ $('#btnReset').addEventListener('click', () => {
 // =============================================================
 //  GPS / zkušební procházka
 // =============================================================
+let napovedaChuze = false;
 let gpsWatch = null, gpsPrvni = true;
 function nastavGpsStav(t) { const e = $('#gpsStav'); if (!t) e.classList.add('skryto'); else { e.textContent = t; e.classList.remove('skryto'); } }
 
@@ -803,7 +823,8 @@ function spustGPS() {
     if (stav.test) return;
     if (err.code === 1) nastavGpsStav('Poloha zakázaná – povol ji v Nastavení, nebo zapni Zkušební procházku');
     else nastavGpsStav('GPS nejde – jdi ven, nebo zapni Zkušební procházku');
-    if (!mapa) { poloha = [MESTA.litomysl.lon, MESTA.litomysl.lat]; vytvorMapu(poloha); toast('Nevidím tvou polohu – mapa ukazuje Litomyšl', 4000); }
+    // GPS nikdy nenašlo polohu → přepnout na zkušební procházku, ať jde chodit ťukáním
+    if (!poloha || !mapa) { prepniTest(true); toast(err.code === 1 ? 'Poloha je zakázaná – chodíš ťukáním na mapu (zkušební procházka)' : 'Nevidím GPS – chodíš ťukáním na mapu (zkušební procházka)', 4500); }
   }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
 }
 function zastavGPS() { if (gpsWatch !== null) { navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; } }
