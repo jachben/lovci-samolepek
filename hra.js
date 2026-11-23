@@ -44,7 +44,7 @@ const NAST = {
   viditZastavky: 700,
   slotMs: 10 * 60e3,     // samolepka vydrží 10 minut
   bunkaLat: 0.0011, bunkaLon: 0.0017,  // mřížka cca 120 × 120 m
-  hustota: 0.32,         // šance na samolepku v buňce (×2 překrývající se vlny)
+  hustota: 0.5,         // šance na samolepku v buňce (×2 překrývající se vlny)
   pauzaZastavky: 5 * 60e3,
   rychlostTest: 9,       // m/s při zkušební procházce
   startLapky: 30,
@@ -123,8 +123,33 @@ function vyberDruh(r, mesto) {
   return pool[Math.floor(r() * pool.length)];
 }
 
+// Náhodná setkání: za každých ~40 m chůze se může kousek před tebou objevit samolepka
+let bonusy = [], posledniBodCesty = null, usloCesta = 0, bonusCislo = 0;
+function cestou(p) {
+  if (!posledniBodCesty) { posledniBodCesty = p.slice(); return; }
+  const d = vzdal(posledniBodCesty, p);
+  if (d < 2) return;
+  const smerChuze = smer(posledniBodCesty, p);
+  posledniBodCesty = p.slice(); usloCesta += Math.min(d, 50);
+  if (usloCesta < 40) return;
+  usloCesta = 0;
+  bonusy = bonusy.filter(b => b.konec > Date.now() && !stav.chyceno[b.id] && !stav.utekli[b.id]);
+  if (Math.random() > 0.65 || bonusy.length >= 4) return;
+  const druh = vyberDruh(Math.random, mestoU(p)); if (!druh) return;
+  const poz = posun(p, 18 + Math.random() * 22, smerChuze + (Math.random() * 120 - 60));
+  const slot = Math.floor(Date.now() / NAST.slotMs);
+  bonusy.push({ id: `b${++bonusCislo}${Date.now() % 100000}_0_${slot}_9`, druh, poz, konec: Date.now() + 4 * 60e3 });
+  vibruj([40, 60, 40]); zvuk('blizko');
+  toast(`Něco se objevilo poblíž!`, 1800);
+  obnovZnacky();
+}
+
 function samolepkyKolem(p) {
   const ted = Date.now(), out = [];
+  for (const b of bonusy) {
+    if (b.konec < ted || stav.chyceno[b.id] || stav.utekli[b.id]) continue;
+    const d = vzdal(p, b.poz); if (d <= NAST.viditelnost) out.push({ ...b, d });
+  }
   const { bunkaLat: BL, bunkaLon: BO } = NAST;
   const cy0 = Math.floor(p[1] / BL), cx0 = Math.floor(p[0] / BO);
   const R = Math.ceil(NAST.viditelnost / 120) + 1;
@@ -322,10 +347,8 @@ function ovladaniMapy() {
   const konec = e => {
     if (!prsty.has(e.pointerId)) return;
     prsty.delete(e.pointerId);
-    if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && !stav.test && !napovedaChuze) {
-      napovedaChuze = true; toast('Panáček chodí s tebou podle GPS. Na zkoušku doma: Menu → Nastavení → Zkušební procházka', 4500);
-    }
-    if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && stav.test) {
+    if (start && start.pohyb <= 8 && Date.now() - start.t < 450 && e.type === 'pointerup' && poloha) {
+      if (!stav.test) { stav.testPoz = poloha.slice(); prepniTest(true, true); toast('Chodíš ťukáním na mapu. Chůzi podle GPS zapneš v Nastavení.', 3500); }
       const r = c.getBoundingClientRect();
       const ll = mapa.unproject([e.clientX - r.left, e.clientY - r.top]);
       cilChuze = [ll.lng, ll.lat];
@@ -346,6 +369,7 @@ function smycka(t) {
     if (d <= krok) { poloha = cilChuze; cilChuze = null; } else poloha = posun(poloha, krok, smer(poloha, cilChuze));
     stav.testPoz = poloha;
   }
+  if (poloha) cestou(poloha);
   if (poloha && mapa) {
     if (!zobrazena || vzdal(zobrazena, poloha) > 300) zobrazena = poloha.slice();
     const pred = zobrazena.slice();
@@ -461,10 +485,17 @@ function obnovOkoli(tvory) {
   }
 }
 
+// Dojdi k cíli, zastav se kousek před ním (už na dosah)
+function jdiK(cil, d, dosah) {
+  if (!stav.test) { stav.testPoz = poloha.slice(); prepniTest(true, true); }
+  const zastav = Math.max(0, d - dosah * 0.6);
+  cilChuze = posun(poloha, zastav, smer(poloha, cil));
+}
+
 function klikNaTvora(id) {
   const z = znacky.get(id); if (!z) return;
   const s = z.data, d = vzdal(poloha, s.poz);
-  if (d > NAST.dosahChytani) { toast(`${s.druh.jmeno} je ${Math.round(d)} m daleko – dojdi blíž`); return; }
+  if (d > NAST.dosahChytani) { jdiK(s.poz, d, NAST.dosahChytani); toast(`Jdu k: ${s.druh.jmeno} (${Math.round(d)} m)`, 1600); return; }
   if (Date.now() > s.konec) { toast('Samolepka už odletěla'); obnovZnacky(); return; }
   if (stav.lapky <= 0) { toast('Došly ti lapky – zastav se na Lepárně'); return; }
   zacniLov(s);
@@ -478,6 +509,7 @@ function klikNaZastavku(id) {
   const z = znacky.get(id); if (!z) return;
   aktZast = z.data;
   const d = vzdal(poloha, aktZast.poz);
+  if (d > NAST.dosahZastavky) { jdiK(aktZast.poz, d, NAST.dosahZastavky); toast(`Jdu k: ${aktZast.jmeno} (${Math.round(d)} m)`, 1600); return; }
   const pouzita = stav.zastavky[id] && Date.now() - stav.zastavky[id] < NAST.pauzaZastavky;
   $('#zastJmeno').textContent = aktZast.jmeno;
   $('#zastDisk').classList.toggle('pouzity', !!pouzita);
@@ -829,14 +861,14 @@ function spustGPS() {
 }
 function zastavGPS() { if (gpsWatch !== null) { navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; } }
 
-function prepniTest(zap) {
+function prepniTest(zap, ticho) {
   stav.test = zap; uloz();
   if (zap) {
     zastavGPS(); nastavGpsStav('');
     poloha = (stav.testPoz || [MESTA.litomysl.lon, MESTA.litomysl.lat]).slice();
-    zobrazena = null;
+    if (!ticho) zobrazena = null;
     if (!mapa) vytvorMapu(poloha);
-    toast('Zkušební procházka: ťukni na mapu a panáček tam dojde', 3200);
+    if (!ticho) toast('Ťukni na mapu a panáček tam dojde', 3200);
   } else { cilChuze = null; spustGPS(); }
 }
 
