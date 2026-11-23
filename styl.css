@@ -367,3 +367,9 @@ body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:150px;point
 #lov.je-postava #lovSila{top:calc(44% - 178px)}
 #lov.je-postava #lovKruh{inset:auto;left:-25px;top:-62px;width:200px;height:200px;z-index:3}
 #lov.je-postava #lovStin{bottom:-10px}
+
+.uvod-samolepky{align-items:flex-end;gap:0;height:170px}
+.uvod-samolepky img{max-height:130px;max-width:120px;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 10px 14px rgba(0,0,0,.35));animation:levituje 2.8s ease-in-out infinite}
+.uvod-samolepky img:nth-child(1){transform:rotate(-8deg);max-height:110px;animation-delay:-.9s}
+.uvod-samolepky img:nth-child(2){max-height:150px;z-index:1;margin:0 -14px}
+.uvod-samolepky img:nth-child(3){max-height:115px;animation-delay:-1.7s}
